@@ -6,6 +6,21 @@ This project helps users enhance their GitHub profile using the CM5 device. It g
 2. Creating/updating their profile README with custom animations
 3. Adding dynamic content that auto-updates
 
+## Important Notes
+**File Generation:** The `algorithmic-art` skill generates files in its skill directory, NOT `/tmp`. When using the skill, explicitly save generated files to `/tmp` for iterative development.
+
+## Environment Setup
+**ALWAYS create venv first:**
+```bash
+uv venv && source .venv/bin/activate
+uv pip install pillow numpy
+```
+
+**Verify gifsicle is installed:**
+```bash
+gifsicle --version || sudo apt install -y gifsicle
+```
+
 ## Workflow
 
 ### 1. GitHub Authentication
@@ -41,7 +56,7 @@ gh repo view USERNAME/USERNAME
 
 **If no README:** Explain profile README benefits:
 - Appears at top of profile page
-- Can include custom animations (SVG only)
+- Can include custom animations (GIF format)
 - Can display dynamic content
 
 Let user choose what to add:
@@ -58,30 +73,30 @@ If this is the FIRST TIME creating the profile README repository, after pushing 
 4. This is a one-time GitHub requirement for new profile READMEs
 
 ### 3. Custom Animations
-When creating animations:
-- **Use `algorithmic-art` skill exclusively**
-- Output MUST be SVG format (GitHub profiles only support SVG)
-- Ask user what style/theme they want
-- Preview and iterate until satisfied
 
-**Personalization Strategy:**
-- If user provides only colors/vague request, explore their repos to personalize based on interests
-- Use `gh repo list USERNAME --limit 20` to see their projects
-- Look for patterns: gaming projects → pixel art style, AI/ML → neural network visuals, web dev → modern gradients
-- Incorporate tech stack or project themes into the animation concept
+**Workflow:**
+1. Use `algorithmic-art` skill → generates HTML + philosophy (save to `/tmp`)
+2. Immediately convert to GIF: 1200×600px, 150 frames, 5s
+3. User sees GIF only (headless - cannot view HTML)
+4. Iterate by editing `/tmp` files, regenerate GIF
 
-**Animation Ideas to Suggest:**
-- **Particle systems**: Text emerging from scattered points, great for tech/sci-fi themes
-- **Wave/audio visualizers**: Pulsing bars or sine waves, perfect for music/audio projects
-- **Geometric patterns**: Rotating shapes, tessellations, fractals for mathematical/algorithmic feel
-- **Code rain**: Matrix-style falling characters for cybersecurity/hacker aesthetic
-- **Pixel art**: Retro 8-bit style animations for game developers
-- **Gradient morphing**: Smooth color transitions for designers/creative developers
-- **Network graphs**: Connected nodes for data science/networking themes
+**GIF Generation:**
+```python
+# Specs
+CANVAS_WIDTH, CANVAS_HEIGHT = 1200, 600
+FRAMES, FPS = 150, 30
 
-**When presenting options:**
-Keep it concise but informative. Format: "Style Name - Brief visual description (why it fits)"
-Example: "Particle Swarm - Golden points coalescing into text (fits your blockchain projects' decentralized theme)"
+# Save with optimization
+frames[0].save("output.gif", save_all=True, append_images=frames[1:],
+               duration=33, loop=0, optimize=True)
+
+# Post-process
+os.system("gifsicle -O3 --colors 128 output.gif -o output.gif")
+```
+
+**Personalization:** Check user repos first: `gh repo list USERNAME --limit 20`. Match animations to tech stack/interests (e.g., signal processing → wave patterns, AI/ML → neural networks, gaming → pixel art).
+
+**Animation Ideas:** Particle systems, wave visualizers, geometric patterns, code rain, gradient morphing, network graphs.
 
 ### 4. Dynamic Content Ideas
 Ask if they want auto-updating content:
